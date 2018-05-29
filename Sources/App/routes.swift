@@ -23,6 +23,4 @@ public func routes(_ router: Router) throws {
             
         }
     }
-    
-    
 }

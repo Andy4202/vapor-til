@@ -40,3 +40,6 @@ extension Acronym: Migration {}
 
 //Vapor provides Content, a wrapper around Codable, which allows you to convert models and other data between various formats.
 extension Acronym: Content {}
+
+
+extension Acronym: Parameter {}

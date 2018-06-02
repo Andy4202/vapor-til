@@ -58,8 +58,21 @@ public func configure(
     //Change the Acronym migration to use the .psql database.
     //migrations.add(model: Todo.self, database: .sqlite)
     //migrations.add(model: Acronym.self, database: .sqlite)
-    migrations.add(model: Acronym.self, database: .psql)
-    //migrations.add(model: Acronym.self, database: .mysql)
-    services.register(migrations)
 
+    //migrations.add(model: Acronym.self, database: .mysql)
+    //Add the new model to the migrations so Fluent prepares the table in the database.
+    migrations.add(model: User.self, database: .psql)
+    
+    //Because you're linking the acronym's userID property to the User table, you must create the USer table first.  So make sure  the User migration is before the Acronym migration.
+    migrations.add(model: Acronym.self, database: .psql)
+        
+    services.register(migrations)
+        
+    // Create a CommandConfig with the default configuration.
+    var commandConfig = CommandConfig.default()
+    // Add the revert command with the identifier revert.  This is the string you use to invoke the command.
+    commandConfig.use(RevertCommand.self, as: "revert")
+    //Register the commandConfig as a service.
+    services.register(commandConfig)
+        
 }

@@ -78,6 +78,36 @@ struct AcronymsController: RouteCollection {
             }
         }
         
+        //Define a new route handler, addCategoriesHandler(_:) that returns a Future<HTTPStatus>
+        func addCategoriesHandler(_ req: Request) throws -> Future<HTTPStatus> {
+            //Use flatMap(to:_:_) to extract both the acronym and category from the request's parameters.
+            return try flatMap(to: HTTPStatus.self,
+                               req.parameters.next(Acronym.self),
+                               req.parameters.next(Category.self)) { acronym, category in
+            //Create a new AcronymCategoryPivot object.
+            //It uses requireID() on the models to ensure that the IDs have been set.
+            //This will throw and error if they have not been set.
+            let pivot = try AcronymCategoryPivot(acronym.requireID(),
+                                                        category.requireID())
+            //Save the pivot in the database and then transform the result into a 201 Created response.
+            return pivot.save(on: req).transform(to: .created)
+                                
+            }
+            
+        }
+        
+        //Define a new route handler, getCategoriesHandler(_:), that returns Future<[Category]>
+        func getCategoriesHandler(_ req: Request) throws -> Future<[Category]> {
+            
+            //Extract the acronym from the request's parameters and unwrap the returned future.
+            return try req.parameters.next(Acronym.self).flatMap(to: [Category].self) { acronym in
+                
+                //Use the new computed property to get the categories.
+                //Then use a Fluent query to return all the categories.
+                try acronym.categories.query(on: req).all()
+            }
+        }
+        
         
         //Register the route.
         //This will make a GET request to /api/acronyms call getAllHandler(_:)
@@ -111,6 +141,15 @@ struct AcronymsController: RouteCollection {
         //This connects an HTTP GET request to /api/acronyms/<ACRONYM ID>/user to
         //  getUserHandler(_:)
         acronymsRoutes.get(Acronym.parameter, "user", use: getUserHandler)
+        
+        //This will route an HTTP POST request to /api/acronyms/<ACRONYM_ID>/categories/<CATEGORY_ID>
+        //  to addCategoriesHandler(_:)
+        acronymsRoutes.post(Acronym.parameter, "categories", Category.parameter, use: addCategoriesHandler)
+        
+        //This routes an HTTP GET request to /api/acronyms/<ACRONYM_ID>/categories
+        // to getCategoriesHandler(_:)
+        acronymsRoutes.get(Acronym.parameter, "categories", use: getCategoriesHandler)
+        
         
     }
     

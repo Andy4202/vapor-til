@@ -76,4 +76,12 @@ extension Acronym {
     }
     
     
+    //Add a computed property to Acronym to get an acronym's categories.
+    //This returns Fluent's generic Sibling type.
+    //It returns the sibling of an Acronym that are of type Category and held using the AcronymCategoryPivot.
+    var categories: Siblings<Acronym, Category, AcronymCategoryPivot> {
+        //Use Fluent's siblings() function to retrieve all the categories. Fluent handles everything else.
+        return siblings()
+    }
+    
 }

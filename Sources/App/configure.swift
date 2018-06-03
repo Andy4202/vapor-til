@@ -66,6 +66,13 @@ public func configure(
     //Because you're linking the acronym's userID property to the User table, you must create the USer table first.  So make sure  the User migration is before the Acronym migration.
     migrations.add(model: Acronym.self, database: .psql)
         
+    //Add the new model to the MigrationConfig so that Fluent creates the table in the database at the next application start.
+    migrations.add(model: Category.self, database: .psql)
+        
+    //Add the AcronymCategoryPivot model to the migration list,
+    //Fluent will prepate the table in the database at the next application start.
+    migrations.add(model: AcronymCategoryPivot.self, database: .psql)
+        
     services.register(migrations)
         
     // Create a CommandConfig with the default configuration.

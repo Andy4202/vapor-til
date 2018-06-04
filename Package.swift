@@ -30,6 +30,8 @@ let package = Package(name: "TILApp", dependencies: [
     // 2. Specify that the App target depends on FluentPostgreSQL to ensure it links correctly.
     .target(name: "App", dependencies: ["FluentPostgreSQL", "Vapor"]),
     .target(name: "Run", dependencies: ["App"]),
+    //test target
+    //This defines a testTarget type a dependency on App.
     .testTarget(name: "AppTests", dependencies: ["App"]),
     ]
 )

@@ -36,11 +36,46 @@ public func configure(
     If the function call returns nil (i.e. the application is running locally), default to the values required for the Docker container */
     let hostname = Environment.get("DATABASE_HOSTNAME") ?? "localhost"
     let username = Environment.get("DATABASE_USER") ?? "vapor"
-    let databaseName = Environment.get("DATABASE_DB") ?? "vapor"
+    //let databaseName = Environment.get("DATABASE_DB") ?? "vapor"
+    
+    /****/
+        
+        //For testing:
+        let databaseName: String
+        let databasePort: Int
+        
+        if (env == .testing) {
+            databaseName = "vapor-test"
+            //databasePort = 5433
+            
+            //This uses the DATABASE_PORT environment variable if set, otherwise defaults the port to 5433.  This allows you to set the port in docker-compose.yml
+            if let testPort = Environment.get("DATABASE_PORT") {
+                databasePort = Int(testPort) ?? 5433
+            } else {
+                databasePort = 5433
+            }
+            
+            
+        } else {
+            databaseName = Environment.get("DATABASE_DB") ?? "vapor"
+            databasePort = 5432
+        }
+        
+    /****/
     let password = Environment.get("DATABASE_PASSWORD") ?? "password"
     
     // Use the properties to create a new PostgreSQLDatabaseConfig.
-    let databaseConfig = PostgreSQLDatabaseConfig(hostname: hostname, username: username, database: databaseName, password: password)
+    //let databaseConfig = PostgreSQLDatabaseConfig(hostname: hostname, username: username, database: databaseName, password: password)
+    
+    //The above is now replaced for testing:
+    //If running in the .testing environment, set the database name and port to different values.
+    //Configure the database port in the PostgreSQLDatabaseConfig
+    let databaseConfig = PostgreSQLDatabaseConfig(hostname: hostname, port: databasePort, username: username, database: databaseName, password: password)
+        
+        
+        
+        
+        
     // Create a PostgreSQLDatabase using the configuration.
     let database = PostgreSQLDatabase(config: databaseConfig)
     

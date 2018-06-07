@@ -13,6 +13,11 @@ struct WebsiteController: RouteCollection {
         
         //Register the route
         router.get("acronyms", Acronym.parameter, use: acronymHandler)
+        //Register the route for /users/<USER ID>, like the API.
+        router.get("users", User.parameter, use: userHandler)
+        
+        //Register the route for /users/, like the API.
+        router.get("users",use: allUsersHandler)
     }
     
     // 4. Implement indexHandler(_:) that returns Future<View>
@@ -43,6 +48,33 @@ struct WebsiteController: RouteCollection {
         }
     }
     
+    //Define the route handler for the user page that returns Future<View>
+    func userHandler(_ req: Request) throws -> Future<View> {
+        //Get the user from the request's parameters and unwrap the future.
+        return try req.parameters.next(User.self).flatMap(to: View.self) { user in
+            //Get the user's acronyms using the computed property and unwrap the future.
+            return try user.acronyms.query(on: req).all().flatMap(to: View.self) {
+                acronyms in
+                //Create a UserContext, then render the user.leaf template, returning the result.
+                //In this case, you're not setting the acronyms array to nil if it's empty.
+                //This is not required as you're checking the count in template.
+                let context = UserContext(title: user.name, user: user, acronyms: acronyms)
+                return try req.view().render("user", context)
+            }
+        }
+    }
+    
+    func allUsersHandler(_ req: Request) throws -> Future<View> {
+        //
+        return User.query(on: req).all().flatMap(to: View.self) { users in
+            let context = AllUsersContext(title: "All Users", users: users)
+            
+            return try req.view().render("allUsers", context)
+            
+        }
+        
+    }
+    
 }
 
 //A type to contain the title.
@@ -59,5 +91,19 @@ struct AcronymContext: Encodable {
     let user: User
 }
 
+//Context for the user page.
+struct UserContext: Encodable {
+    //Title of the page, which is the user's name
+    let title: String
+    //User object to which the page refers
+    let user: User
+    //The acronym created by this user.
+    let acronyms: [Acronym]
+}
+
+struct AllUsersContext: Encodable {
+    let title: String
+    let users: [User]
+}
 
 

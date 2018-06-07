@@ -2,6 +2,8 @@
 import FluentPostgreSQL
 //import FluentMySQL
 import Vapor
+import Leaf
+
 
 /// Called before your application initializes.
 public func configure(
@@ -13,7 +15,7 @@ public func configure(
     //try services.register(FluentSQLiteProvider())
     try services.register(FluentPostgreSQLProvider())
     //try services.register(FluentMySQLProvider())
-        
+    try services.register(LeafProvider())
         
     /// Register routes to the router
     let router = EngineRouter.default()
@@ -117,4 +119,6 @@ public func configure(
     //Register the commandConfig as a service.
     services.register(commandConfig)
         
+    //This tells Vapor to use LeafRenderer when asked for a ViewRenderer type.
+    config.prefer(LeafRenderer.self, for: ViewRenderer.self)
 }
